@@ -99,17 +99,6 @@ def charactersWordsByMovies(characterName):
     return charactersFriends
 
 
-''' --------------- normallizing a characters' lines in order to create a word-frequency dictionary ---------------- '''
-def words_distribution(LinesBycharacterName):
-    characterName_words = []
-    for i in range(0, len(LinesBycharacterName)):
-        line = LinesBycharacterName.loc[i].str.split(' ')[0]
-        normalized_line = [normalize_caseless((line[index]).translate(str.maketrans('', '', string.punctuation))) for
-                           index in range(0, len(line))]
-        characterName_words.extend(normalized_line)
-    return most_common(characterName_words)
-
-
 ''' ---------------------------- counting a characters number of words in given script ----------------------------- '''
 def countCharactersWords(tableName, characterName):
     countWords=0
@@ -117,7 +106,7 @@ def countCharactersWords(tableName, characterName):
     linesFetch=text('SELECT Line FROM '+tableName+' WHERE Character= :characterName')
     SentencesByCharacter=conn.execute(linesFetch, characterName=characterName).fetchall()
     LinesByCharacter = pd.DataFrame(SentencesByCharacter, columns=['line'])
-    Characters_words = words_distribution(LinesByCharacter)
+    Characters_words = charactersWordsDictionary(LinesByCharacter)
     for word in Characters_words:
         countWords += word[1]
     return countWords
@@ -130,6 +119,31 @@ def charactersWordsCounterArray(characterName):
     for movie in movies:
         CountCharactersWords.append(countCharactersWords(movie, characterName))
     return CountCharactersWords
+
+
+''' ----------------------- returning the number of Voldemort refernces in a specific script ----------------------- '''
+def VoldemortAppearences(tableName, movieNum):
+    conn = engine.connect()
+    if movieNum==1 or movieNum==3 or movieNum==4:
+            Vappearences=text("SELECT COUNT(Line) AS num_V_references FROM "+tableName+" WHERE Line LIKE '%Voldemort%' or Line LIKE '% Dark Lord%'")
+    elif movieNum==2:
+        Vappearences = text("SELECT COUNT(Line) AS num_V_references FROM "+tableName+" WHERE Line LIKE '%Voldemort%' or Line LIKE '% Tom%' or Line LIKE '% Dark Lord%' or Line LIKE '% Riddle%'")
+    else:
+        Vappearences = text("SELECT COUNT(Line) AS num_V_references FROM "+tableName+" WHERE Line LIKE '%Voldemort%' or Line LIKE '% Tom %' or Line LIKE '% Dark Lord%'")
+    VReferences=conn.execute(Vappearences , tableName=tableName).fetchall()
+    VoldemortReferences= pd.DataFrame(VReferences, columns=['num_references'])
+    return VoldemortReferences.num_references[0]
+
+
+''' ------ returning an array containing the number of Voldemort references in Harry Potter 1,2,3,4,6 scripts ------ '''
+def voldemortReferences():
+    movies=['HarryPotter1Script', 'HarryPotter2Script', 'HarryPotter3Script','HarryPotter4Script','HarryPotter6Script']
+    VoldemortArray = []
+    for movie in range(len(movies)):
+        VoldemortArray.append(VoldemortAppearences(movies[movie], movie+1))
+    return VoldemortArray
+
+
 
 
 ''' --------------------------------------------------------------------------------------------------------------- '''
@@ -146,29 +160,6 @@ for name in trioArray:
 
 
 ''' --------------------------------------------- Voldemort References --------------------------------------------- '''
-
-''' ----------------------- returning the number of Voldemort refernces in a specific script ----------------------- '''
-def VoldemortAppearences(tableName, movieNum):
-    conn = engine.connect()
-    if movieNum==1 or movieNum==3 or movieNum==4:
-            Vappearences=text("SELECT COUNT(Line) AS num_V_references FROM "+tableName+" WHERE Line LIKE '%Voldemort%' or Line LIKE '% Dark Lord%'")
-    elif movieNum==2:
-        Vappearences = text("SELECT COUNT(Line) AS num_V_references FROM "+tableName+" WHERE Line LIKE '%Voldemort%' or Line LIKE '% Tom%' or Line LIKE '% Dark Lord%' or Line LIKE '% Riddle%'")
-    else:
-        Vappearences = text("SELECT COUNT(Line) AS num_V_references FROM "+tableName+" WHERE Line LIKE '%Voldemort%' or Line LIKE '% Tom %' or Line LIKE '% Dark Lord%'")
-    VReferences=conn.execute(Vappearences , tableName=tableName).fetchall()
-    VoldemortReferences= pd.DataFrame(VReferences, columns=['num_references'])
-    return VoldemortReferences.num_references[0]
-
-
-''' ------ returning an array containing the number of Voldemort refernces in Harry Potter 1,2,3,4,6 scripts ------ '''
-def voldemortReferences():
-    movies=['HarryPotter1Script', 'HarryPotter2Script', 'HarryPotter3Script','HarryPotter4Script','HarryPotter6Script']
-    VoldemortArray = []
-    for movie in range(len(movies)):
-        VoldemortArray.append(VoldemortAppearences(movies[movie], movie+1))
-    return VoldemortArray
-
 
 ''' ------------------- plotting a graph that shows Voldemort's referenecs by movies (1,2,3,4,6) ------------------- '''
 movies=[1,2,3,4,6]
