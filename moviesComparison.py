@@ -94,7 +94,7 @@ HP2MovieName='Harry Potter 2'
 HP2MovieScript='HarryPotter2Script'
 (HP2, pos2, HP2_nodes_colors, HP2_edge_labels)=createTwoSidedGraph([HP2MovieName], [HP2MovieScript])
 
-# In order to display G and HP2 graph on the dame plot, shifting the x values of every node in HP2 up by 8
+# In order to display G and HP2 graph on the same plot, shifting the x values of every node in HP2 up by 8
 for k,v in pos2.items():
     v[1] += 8
 
