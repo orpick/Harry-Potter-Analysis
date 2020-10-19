@@ -24,7 +24,9 @@ createTable('C:\\Users\\OR\\PycharmProjects\\CoffeeAndHappiness\\Harry_Potter_6_
 
 ''' ----------------- finding the top 3 characters in tableName that are not Harry Hermione or Ron ----------------- '''
 def topCharacters(tableName):
-    topNames=engine.execute("SELECT Character, COUNT(Line) AS num_lines FROM "+tableName+" WHERE Character NOT IN ('Harry', 'Hermione', 'Ron') GROUP BY Character ORDER BY num_lines DESC LIMIT 3")
+    topNames=engine.execute("SELECT Character, COUNT(Line) AS num_lines FROM "+tableName+" \
+                            WHERE Character NOT IN ('Harry', 'Hermione', 'Ron') GROUP BY Character \
+                            ORDER BY num_lines DESC LIMIT 3")
     topCharacters=pd.DataFrame(topNames, columns=['Character', 'Number of lines'])
     return topCharacters
 
